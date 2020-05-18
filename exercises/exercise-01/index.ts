@@ -10,7 +10,7 @@ Intro:
 
     Initially we only had users in the in-memory database. After
     introducing Admins, we need to fix the types so that
-    everything works well together.
+everything works well together.
 
 Exercise:
 
@@ -40,7 +40,9 @@ interface Admin {
     role: string;
 }
 
-const persons: User[] /* <- Person[] */ = [
+type Person = Admin | User;
+
+const persons: Person[] /* <- Person[] */ = [
     {
         name: 'Max Mustermann',
         age: 25,
@@ -63,7 +65,7 @@ const persons: User[] /* <- Person[] */ = [
     }
 ];
 
-function logPerson(user: User) {
+function logPerson(user: Person) {
     console.log(` - ${chalk.green(user.name)}, ${user.age}`);
 }
 
