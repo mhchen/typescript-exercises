@@ -41,7 +41,10 @@ interface Admin {
     role: string;
 }
 
-type PowerUser = unknown;
+interface PowerUser extends Omit<Admin, 'type'>, Omit<User, 'type'> {
+    type: 'powerUser';
+}
+
 
 type Person = User | Admin | PowerUser;
 
