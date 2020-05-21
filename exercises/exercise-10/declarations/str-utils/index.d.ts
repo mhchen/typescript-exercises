@@ -5,5 +5,4 @@ declare module 'str-utils' {
     export const strToUpper: StringManipulator;
     export const strRandomize: StringManipulator;
     export const strInvertCase: StringManipulator;
-    // export function ...
 }
