@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import {promises as fs} from 'mz/fs';
 
 type Criteria<V> = {
     $gt: V;
@@ -36,23 +36,16 @@ type Options<T> = {
 }
 
 export class Database<T extends {}> {
-    protected records: T[];
+    protected filename: string;
     protected fullTextSearchFieldNames: (keyof T)[];
 
     constructor(filename: string, fullTextSearchFieldNames: (keyof T)[]) {
+        this.filename = filename;
         this.fullTextSearchFieldNames = fullTextSearchFieldNames;
-        const lines = fs.readFileSync(filename, 'utf-8').trim().split('\n');
-        this.records = [];
-        for (const line of lines) {
-            if (!line.startsWith('E')) {
-                continue;
-            }
-            this.records.push(JSON.parse(line.replace(/^E/, '')) as T);
-        }
     }
 
     async find(query: Query<T>, options: Options<T>): Promise<Partial<T>[]> {
-        const records = this.records.filter(this.getFilterFunction(query));
+        const records = (await this.getRecords()).filter(this.getFilterFunction(query));
         let finalRecords: Partial<T>[] = records;
         if (options.projection) {
             finalRecords = records.map((record) => {
@@ -138,5 +131,17 @@ export class Database<T extends {}> {
             }
             throw new Error(`Unknown key-based filter: query=${JSON.stringify(query)}`);
         }
+    }
+
+    private async getRecords() {
+        const records = [];
+        const lines = (await fs.readFile(this.filename, 'utf-8')).trim().split('\n');
+        for (const line of lines) {
+            if (!line.startsWith('E')) {
+                continue;
+            }
+            records.push(JSON.parse(line.replace(/^E/, '')) as T);
+        }
+        return records;
     }
 }
